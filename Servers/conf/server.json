@@ -1,0 +1,7 @@
+{
+  "LogLevel": "debug",
+  "LogPath": "",
+
+  "TCPAddr": "localhost:21003",
+  "MaxConnNum": 5
+}
