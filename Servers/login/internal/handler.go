@@ -2,7 +2,9 @@ package internal
 
 import (
 	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"leaf-chat/Servers/db/mongodb/accountDB"
 	"leaf-chat/Servers/msg"
 	"reflect"
 )
@@ -30,13 +32,12 @@ func handleLogin(args []interface{}) {
 		sendErrFunc("account name is null")
 		return
 	}
-	////后台console 输出内容
-	log.Debug("User Login Name is  %v", receMsg.LoginName)
-	log.Debug("User Login PW is  %v", receMsg.LoginPW)
-	//// 给发送者回应一个 Test 消息
-	//a.WriteMsg(&msg.UserLogin{
-	//	LoginName: "from fucn handleLogin ",
-	//})
+	// 获取该人员的数据库信息
+	accountData, err := accountDB.Get(receMsg.LoginName)
 
-	agent.WriteMsg(agent)
+	if err == mgo.ErrNotFound {
+		accountData = &accountDB.Data{Id: bson.NewObjectId(), Name: receMsg.LoginName, Password: receMsg.LoginPW}
+		err = accountDB.Create(accountData)
+	}
+
 }

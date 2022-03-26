@@ -1,4 +1,4 @@
-package acountDB
+package accountDB
 
 import (
 	lmongodb "github.com/name5566/leaf/db/mongodb"
