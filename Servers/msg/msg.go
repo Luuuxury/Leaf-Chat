@@ -7,7 +7,7 @@ import (
 var Processor = json.NewProcessor()
 
 type ToGameModuleMsg struct {
-	Name string
+	MsgInfo string
 }
 
 type UserRegister struct {
@@ -32,6 +32,8 @@ type UserLoginResult struct {
 
 func init() {
 	Processor.Register(&ToGameModuleMsg{})
-	Processor.Register(&UserLogin{})
 	Processor.Register(&UserRegister{})
+	Processor.Register(&UserRegisterResult{})
+	Processor.Register(&UserLogin{})
+	Processor.Register(&UserLoginResult{})
 }

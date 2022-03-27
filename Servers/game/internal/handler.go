@@ -17,15 +17,13 @@ func init() {
 }
 
 func handleHello(args []interface{}) {
-	// 收到的 Hello 消息
-	m := args[0].(*msg.ToGameModuleMsg)
+	receMsg := args[0].(*msg.ToGameModuleMsg)
 	// 消息的发送者
-	a := args[1].(gate.Agent)
+	agent := args[1].(gate.Agent)
 	// 输出收到的消息的内容
-	log.Debug("hello %v", m.Name)
-	// 给发送者回应一个 Hello 消息
-	a.WriteMsg(&msg.ToGameModuleMsg{
-		Name: "WriteMsg to Client Call back from game handler!",
+	log.Debug("游戏业务处理模块 接收到了 来自前端的消息 %v", receMsg.MsgInfo)
+	agent.WriteMsg(&msg.ToGameModuleMsg{
+		MsgInfo: "WriteMsg to Client Call back from game handler!",
 	})
 }
 

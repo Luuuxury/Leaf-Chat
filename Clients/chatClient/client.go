@@ -10,12 +10,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	// Hello 消息（JSON 格式）
 	// 对应游戏服务器 Hello 消息结构体
 	data := []byte(`{
-		"Hello": {
-			"Name": "早上好"
+		"ToGameModuleMsg": {
+			"MsgInfo": "这个消息需要游戏业务处理"
 		}
 	}`)
 	// len + data
@@ -27,9 +26,9 @@ func main() {
 	conn.Write(m)
 	if true {
 		data := []byte(`{
-		"UserLogin": {
-			"LoginName": "LiuYinLing",
-			"LoginPW": "I love you"
+		"UserRegister": {
+			"RegisterName": "Luxury",
+			"RegisterPW": "Imissyou"
 		}
 	}`)
 		m := make([]byte, 2+len(data))

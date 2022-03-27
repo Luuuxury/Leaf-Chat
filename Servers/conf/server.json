@@ -2,6 +2,9 @@
   "LogLevel": "debug",
   "LogPath": "",
 
-  "TCPAddr": "localhost:21003",
-  "MaxConnNum": 5
+  "TCPAddr": "localhost:21002",
+  "MaxConnNum": 5,
+
+  "MongodbAddr": "localhost",
+  "MongodbSessionNum": 100
 }
