@@ -25,6 +25,7 @@ func init() {
 }
 
 func getCollection(session *lmongodb.Session) *mgo.Collection {
+	// DB("数据库名") C - collection ("表名/ 集合名")
 	return session.DB("login").C("account")
 }
 

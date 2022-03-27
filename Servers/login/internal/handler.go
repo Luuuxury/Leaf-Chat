@@ -27,7 +27,6 @@ func handleLogin(args []interface{}) {
 		sendMsg.Err = err
 		agent.WriteMsg(sendMsg)
 	}
-
 	if receMsg.LoginName == "" {
 		sendErrFunc("account name is null")
 		return
@@ -38,6 +37,13 @@ func handleLogin(args []interface{}) {
 	if err == mgo.ErrNotFound {
 		accountData = &accountDB.Data{Id: bson.NewObjectId(), Name: receMsg.LoginName, Password: receMsg.LoginPW}
 		err = accountDB.Create(accountData)
+	}
+	if err != nil {
+		sendErrFunc(err.Error())
+		return
+	} else if accountData.Password != receMsg.LoginPW {
+		sendErrFunc("password is error")
+		return
 	}
 
 }

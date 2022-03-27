@@ -25,7 +25,7 @@ var Server struct {
 }
 
 func init() {
-	data, err := ioutil.ReadFile("/Users/liuyang/Desktop/Go_Dev/leafserver/bin/conf/server.json")
+	data, err := ioutil.ReadFile("/Users/liuyang/Desktop/Git/Go_Dev/Leaf-Chat/Servers/conf/server.json")
 	if err != nil {
 		log.Fatal("%v", err)
 	}
