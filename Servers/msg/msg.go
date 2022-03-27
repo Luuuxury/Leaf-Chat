@@ -2,29 +2,36 @@ package msg
 
 import (
 	"github.com/name5566/leaf/network/json"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var Processor = json.NewProcessor()
 
-type Hello struct {
+type ToGameModuleMsg struct {
 	Name string
 }
 
-type C2L_Login struct {
+type UserRegister struct {
+	RegisterName string
+	RegisterPW   string
+}
+
+type UserRegisterResult struct {
+	Err       string
+	Retresult string
+}
+
+type UserLogin struct {
 	LoginName string
 	LoginPW   string
 }
 
-type L2C_Login struct {
+type UserLoginResult struct {
 	Err       string
-	Id        bson.ObjectId
-	FrontAddr string
-	Token     bson.ObjectId
+	Retresult string
 }
 
 func init() {
-	Processor.Register(&Hello{})
-	Processor.Register(&C2L_Login{})
-	Processor.Register(&L2C_Login{})
+	Processor.Register(&ToGameModuleMsg{})
+	Processor.Register(&UserLogin{})
+	Processor.Register(&UserRegister{})
 }

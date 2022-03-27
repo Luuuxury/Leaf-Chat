@@ -13,18 +13,18 @@ func handler(m interface{}, h interface{}) {
 
 func init() {
 	// 向当前模块（game 模块）注册 Hello 消息的消息处理函数 handleHello
-	handler(&msg.Hello{}, handleHello)
+	handler(&msg.ToGameModuleMsg{}, handleHello)
 }
 
 func handleHello(args []interface{}) {
 	// 收到的 Hello 消息
-	m := args[0].(*msg.Hello)
+	m := args[0].(*msg.ToGameModuleMsg)
 	// 消息的发送者
 	a := args[1].(gate.Agent)
 	// 输出收到的消息的内容
 	log.Debug("hello %v", m.Name)
 	// 给发送者回应一个 Hello 消息
-	a.WriteMsg(&msg.Hello{
+	a.WriteMsg(&msg.ToGameModuleMsg{
 		Name: "WriteMsg to Client Call back from game handler!",
 	})
 }

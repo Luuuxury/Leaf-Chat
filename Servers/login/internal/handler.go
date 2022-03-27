@@ -1,12 +1,14 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/name5566/leaf/gate"
-	"gopkg.in/mgo.v2"
+	"github.com/name5566/leaf/log"
 	"gopkg.in/mgo.v2/bson"
-	"leaf-chat/Servers/db/mongodb/accountDB"
+	"leaf-chat/Servers/db/mongodb"
 	"leaf-chat/Servers/msg"
 	"reflect"
+	"regexp"
 )
 
 func handler(m interface{}, h interface{}) {
@@ -14,15 +16,40 @@ func handler(m interface{}, h interface{}) {
 }
 
 func init() {
-	handler(&msg.C2L_Login{}, handleLogin)
+	//handler(&msg.UserRegister{}, handleLogin)
+	handler(&msg.UserLogin{}, handleRegister)
 }
 
+func handleRegister(args []interface{}) {
+	receMsg := args[0].(*msg.UserRegister)
+	agent := args[1].(gate.Agent)
+	returnMsg := &msg.UserRegisterResult{}
+	log.Debug("receive UserRegister name=%v", receMsg.RegisterName)
+
+	// UserName 注册规则
+	reg := regexp.MustCompile(`/^[a-zA-Z\d]\w{2,10}[a-zA-Z\d]$/`)
+	matched := reg.FindString(receMsg.RegisterName)
+	if matched != " " {
+		log.Debug("注册用户名不合法")
+	}
+	// 判断用户是否已经注册
+	err := mongodb.Find("game", "login", bson.M{"name": receMsg.RegisterName})
+	if err == nil {
+		fmt.Println(err)
+		log.Debug("该用户名已经注册, 注册失败")
+		returnMsg.Err = "用户名已经注册了, 请重新注册～"
+		returnMsg.Retresult = "Retresult is ok"
+		agent.WriteMsg(returnMsg)
+	}
+}
+
+/*
 // 消息处理
 func handleLogin(args []interface{}) {
-	receMsg := args[0].(*msg.C2L_Login)
+	receMsg := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
 
-	sendMsg := &msg.L2C_Login{}
+	sendMsg := &msg.UserLoginResult{}
 	sendErrFunc := func(err string) {
 		sendMsg.Err = err
 		agent.WriteMsg(sendMsg)
@@ -47,3 +74,4 @@ func handleLogin(args []interface{}) {
 	}
 
 }
+*/
