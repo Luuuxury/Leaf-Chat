@@ -32,7 +32,7 @@ func InitData() {
 	if err == nil {
 		log.Debug("数据库已经初始化过了", err)
 	} else {
-		err = Insert("game", "login", bson.M{"name": "InitName", "password": "123456"})
+		err = Insert("game", "login", bson.M{"name": "InitName", "password": "qq123456"})
 		if err != nil {
 			fmt.Println(err)
 			log.Debug("数据初始化插入失败", err)

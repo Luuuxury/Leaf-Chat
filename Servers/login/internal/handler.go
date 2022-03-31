@@ -8,7 +8,6 @@ import (
 	"leaf-chat/Servers/db/mongodb"
 	"leaf-chat/Servers/msg"
 	"reflect"
-	"regexp"
 )
 
 func handler(m interface{}, h interface{}) {
@@ -17,34 +16,45 @@ func handler(m interface{}, h interface{}) {
 
 func init() {
 	//handler(&msg.UserRegister{}, handleLogin)
-	handler(&msg.UserLogin{}, handleRegister)
+	handler(&msg.UserRegister{}, handleRegister)
 }
 
 func handleRegister(args []interface{}) {
 	receMsg := args[0].(*msg.UserRegister)
 	agent := args[1].(gate.Agent)
-	returnMsg := &msg.UserRegisterResult{}
-	log.Debug("receive UserRegister name=%v", receMsg.RegisterName)
 
-	// UserName 注册规则
-	reg := regexp.MustCompile(`/^[a-zA-Z\d]\w{2,10}[a-zA-Z\d]$/`)
-	matched := reg.FindString(receMsg.RegisterName)
-	if matched != " " {
-		log.Debug("注册用户名不合法")
-	}
-	// 判断用户是否已经注册
+	returnMsg := &msg.UserRegisterResult{}
+	log.Debug("receive RegisterName is %v", receMsg.RegisterName)
+	log.Debug("receive RegisterPW is %v", receMsg.RegisterPW)
+
+	//判断用户是否已经注册
 	err := mongodb.Find("game", "login", bson.M{"name": receMsg.RegisterName})
 	if err == nil {
-		fmt.Println(err)
-		log.Debug("该用户名已经注册, 注册失败")
+		fmt.Println("执行 mongodb.Find 完成， err为None, err is", err)
+		log.Debug("Debug is 该用户名已经注册, 请换个用户名")
 		returnMsg.Err = "用户名已经注册了, 请重新注册～"
+		returnMsg.Retresult = "Retresult is ok"
+		// 给客户端返回，说明已经该用户已经注册过了
+		agent.WriteMsg(returnMsg)
+	}
+	// 如果该用户名没有被注册过，就直接 insert
+	err = mongodb.Insert("game", "login", bson.M{"name": receMsg.RegisterName, "password": receMsg.RegisterPW})
+	if err != nil {
+		fmt.Println("执行插入用户操作失败, 报错提示 is", err)
+		log.Debug("Debug 用户名写入失败!")
+		returnMsg.Err = "returnMsg.Err is :用户名插入失败！"
+		returnMsg.Retresult = "Retresult is ok"
+		agent.WriteMsg(returnMsg)
+	} else {
+		fmt.Println("执行插入用户操作 sucess")
+		log.Debug("Debug UserRegister write in success")
+		returnMsg.Err = "returnMsg.Err is :用户名插入成功！"
 		returnMsg.Retresult = "Retresult is ok"
 		agent.WriteMsg(returnMsg)
 	}
 }
 
 /*
-// 消息处理
 func handleLogin(args []interface{}) {
 	receMsg := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
