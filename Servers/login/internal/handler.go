@@ -17,7 +17,7 @@ func handler(m interface{}, h interface{}) {
 
 func init() {
 	//handler(&msg.UserRegister{}, handleLogin)
-	handler(&msg.UserRegister{}, handleRegister)
+	//handler(&msg.UserRegister{}, handleRegister)
 	handler(&msg.UserLogin{}, handleUserLogin)
 }
 
@@ -61,7 +61,7 @@ func handleUserLogin(args []interface{}) {
 	agent := args[1].(gate.Agent)
 	returnMsg := &msg.UserLoginResult{}
 	log.Debug("receive UserLogin name=%v", receMsg.LoginName)
-	log.Debug("receive UserLogin name=%v", receMsg.LoginPW)
+	log.Debug("receive UserLogin pw=%v", receMsg.LoginPW)
 
 	sendErrFunc := func(err string) {
 		returnMsg.Err = err
@@ -74,6 +74,8 @@ func handleUserLogin(args []interface{}) {
 	}
 	// 获取该人员的数据库信息
 	userData, err := mongodb.FetchUserData(receMsg.LoginName)
+	fmt.Println("Fetch User Data is", userData)
+	fmt.Println("Fetch User pw is ", userData.Password)
 	// 如果数据库没有这个人，就把把这个人添加进去
 	if err == mgo.ErrNotFound {
 		fmt.Println("数据库没有这个人，请重新输入正确的用户名")
@@ -83,7 +85,6 @@ func handleUserLogin(args []interface{}) {
 		return
 		// 如果有这个人，但是密码错误
 	} else if userData.Password != receMsg.LoginPW {
-		sendErrFunc("登陆密码不对！")
-		return
+		fmt.Println("登陆密码不对！")
 	}
 }
