@@ -69,3 +69,19 @@ func Insert(db string, collection string, docs interface{}) error {
 	}
 	return err
 }
+
+type UserData struct {
+	Id       bson.ObjectId `bson:"_id"`
+	Name     string
+	Password string
+}
+
+func FetchUserData(name string) (*UserData, error) {
+	c := dialContext
+	s := c.Ref()
+	defer c.UnRef(s)
+
+	resultData := &UserData{}
+	err := s.DB("game").C("login").Find(bson.M{"name": name}).One(resultData)
+	return resultData, err
+}

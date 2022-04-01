@@ -13,7 +13,7 @@ func main() {
 
 	RegisterData := []byte(`{
 		"UserRegister": {
-			"RegisterName": "luxury01",
+			"RegisterName": "LiuYinLing",
 			"RegisterPW": "Imissyou"
 		}
 	}`)
@@ -22,6 +22,7 @@ func main() {
 	binary.BigEndian.PutUint16(registerMsg, uint16((len(RegisterData))))
 	copy(registerMsg[2:], RegisterData)
 	conn.Write(registerMsg)
+
 	//
 	//GameData := []byte(`{
 	//	"ToGameModuleMsg": {

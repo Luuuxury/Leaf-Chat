@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"leaf-chat/Servers/db/mongodb"
 	"leaf-chat/Servers/msg"
@@ -17,6 +18,7 @@ func handler(m interface{}, h interface{}) {
 func init() {
 	//handler(&msg.UserRegister{}, handleLogin)
 	handler(&msg.UserRegister{}, handleRegister)
+	handler(&msg.UserLogin{}, handleUserLogin)
 }
 
 func handleRegister(args []interface{}) {
@@ -54,34 +56,34 @@ func handleRegister(args []interface{}) {
 	}
 }
 
-/*
-func handleLogin(args []interface{}) {
+func handleUserLogin(args []interface{}) {
 	receMsg := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
+	returnMsg := &msg.UserLoginResult{}
+	log.Debug("receive UserLogin name=%v", receMsg.LoginName)
+	log.Debug("receive UserLogin name=%v", receMsg.LoginPW)
 
-	sendMsg := &msg.UserLoginResult{}
 	sendErrFunc := func(err string) {
-		sendMsg.Err = err
-		agent.WriteMsg(sendMsg)
+		returnMsg.Err = err
+		agent.WriteMsg(returnMsg)
 	}
+
 	if receMsg.LoginName == "" {
 		sendErrFunc("account name is null")
 		return
 	}
 	// 获取该人员的数据库信息
-	accountData, err := accountDB.Get(receMsg.LoginName)
-
+	userData, err := mongodb.FetchUserData(receMsg.LoginName)
+	// 如果数据库没有这个人，就把把这个人添加进去
 	if err == mgo.ErrNotFound {
-		accountData = &accountDB.Data{Id: bson.NewObjectId(), Name: receMsg.LoginName, Password: receMsg.LoginPW}
-		err = accountDB.Create(accountData)
+		fmt.Println("数据库没有这个人，请重新输入正确的用户名")
 	}
 	if err != nil {
-		sendErrFunc(err.Error())
+		fmt.Println("获取人员信息出错了! err is", err)
 		return
-	} else if accountData.Password != receMsg.LoginPW {
-		sendErrFunc("password is error")
+		// 如果有这个人，但是密码错误
+	} else if userData.Password != receMsg.LoginPW {
+		sendErrFunc("登陆密码不对！")
 		return
 	}
-
 }
-*/
