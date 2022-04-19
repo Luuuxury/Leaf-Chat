@@ -17,7 +17,7 @@ func handler(m interface{}, h interface{}) {
 
 func init() {
 	//handler(&msg.UserRegister{}, handleLogin)
-	//handler(&msg.UserRegister{}, handleRegister)
+	handler(&msg.UserRegister{}, handleRegister)
 	handler(&msg.UserLogin{}, handleUserLogin)
 }
 
@@ -72,6 +72,7 @@ func handleUserLogin(args []interface{}) {
 		sendErrFunc("account name is null")
 		return
 	}
+
 	// 获取该人员的数据库信息
 	userData, err := mongodb.FetchUserData(receMsg.LoginName)
 	fmt.Println("Fetch User Data is", userData)

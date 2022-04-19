@@ -11,28 +11,28 @@ func main() {
 		panic(err)
 	}
 	//
-	//RegisterData := []byte(`{
-	//	"UserRegister": {
-	//		"RegisterName": "LiuYinLing",
-	//		"RegisterPW": "Imissyou"
-	//	}
-	//}`)
-	//registerMsg := make([]byte, 2+len(RegisterData))
-	////
-	//binary.BigEndian.PutUint16(registerMsg, uint16((len(RegisterData))))
-	//copy(registerMsg[2:], RegisterData)
-	//conn.Write(registerMsg)
-
-	LoginerData := []byte(`{
-	"UserLogin":{
-		"LoginName": "luxury01",
-		"LoginPW": "ImissyouL"
+	RegisterData := []byte(`{
+		"UserRegister": {
+			"RegisterName": "Lyyy",
+			"RegisterPW": "Fuck"
 		}
 	}`)
-	loginerMsg := make([]byte, 2+len(LoginerData))
-	binary.BigEndian.PutUint16(loginerMsg, uint16((len(LoginerData))))
-	copy(loginerMsg[2:], LoginerData)
-	conn.Write(loginerMsg)
+	registerMsg := make([]byte, 2+len(RegisterData))
+	//
+	binary.BigEndian.PutUint16(registerMsg, uint16((len(RegisterData))))
+	copy(registerMsg[2:], RegisterData)
+	conn.Write(registerMsg)
+
+	//LoginerData := []byte(`{
+	//"UserLogin":{
+	//	"LoginName": "lyyyy",
+	//	"LoginPW": "fuck"
+	//	}
+	//}`)
+	//loginerMsg := make([]byte, 2+len(LoginerData))
+	//binary.BigEndian.PutUint16(loginerMsg, uint16((len(LoginerData))))
+	//copy(loginerMsg[2:], LoginerData)
+	//conn.Write(loginerMsg)
 
 	//
 	//GameData := []byte(`{
