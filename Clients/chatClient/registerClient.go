@@ -13,7 +13,7 @@ func main() {
 	//
 	RegisterData := []byte(`{
 		"UserRegister": {
-			"RegisterName": "Lyyy",
+			"RegisterName": "lyl",
 			"RegisterPW": "Fuck"
 		}
 	}`)
