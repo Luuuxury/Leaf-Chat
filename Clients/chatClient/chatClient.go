@@ -1,24 +1,37 @@
 package main
 
-import (
-	"encoding/binary"
-	"net"
-)
+import "net"
+
+type User struct {
+	Name string
+	Addr string
+	C    chan string
+	conn net.Conn
+}
+
+// NewUser 创建一个用户API
+func NewUser(conn net.Conn) *User {
+	userAddr := conn.RemoteAddr().String()
+	user := &User{
+		Name: userAddr,
+		Addr: userAddr,
+		C:    make(chan string),
+		conn: conn,
+	}
+	// 每次创建user之后， 就启动监听当前user channel 消息的 goroutine
+	go user.ListenMessage()
+
+	return user
+}
+
+// ListenMessage 监听 User Channel 一旦有消息了就发送给客户端
+func (this *User) ListenMessage() {
+	for {
+		msg := <-this.C
+		this.conn.Write([]byte(msg + "/n"))
+	}
+}
 
 func main() {
-	conn, err := net.Dial("tcp", "127.0.0.1:21002")
-	if err != nil {
-		panic(err)
-	}
 
-	LoginerData := []byte(`{
-	"C2S_AddUser":{
-		"UserName": "lyl"
-		}
-	}`)
-
-	loginerMsg := make([]byte, 2+len(LoginerData))
-	binary.BigEndian.PutUint16(loginerMsg, uint16(len(LoginerData)))
-	copy(loginerMsg[2:], LoginerData)
-	conn.Write(loginerMsg)
 }

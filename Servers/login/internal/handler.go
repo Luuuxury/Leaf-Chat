@@ -65,21 +65,20 @@ func handleRegist(args []interface{}) {
 func handleLogin(args []interface{}) {
 	recv := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
-	// log.Debug("登陆用户名是: %v", recv.LoginName)
-	// log.Debug("登陆密码是: %v", recv.LoginPW)
+	log.Debug("登陆用户名是: %v", recv.LoginName)
+	log.Debug("登陆密码是: %v", recv.LoginPW)
 	if recv.LoginName == "" {
 		log.Debug("登陆用户名为空!")
 		return
 	}
 
-	// 从数据库核对用户名和密码
+	// 数据库获取该用户信息
 	userData, err := mongodb.FetchUserData(recv.LoginName)
-	// 如果数据库没有这个人，就把把这个人添加进去
 	if err == mgo.ErrNotFound {
 		log.Debug("登陆用户名不存在，请输入正确的用户名!")
 		return
 	}
-
+	// 密码核对
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(recv.LoginPW))
 	if err != nil {
 		log.Debug("输入的用户名或密码不正确!")
@@ -87,7 +86,7 @@ func handleLogin(args []interface{}) {
 		log.Debug("登陆成功!")
 	}
 
-	// 将该用户加入群聊
+	// 将该用户添加到世界聊天
 	agent.SetUserData(recv.LoginName)
 	for i := 0; i < maxMessages; i++ {
 		index := (messageIndex + i) % maxMessages

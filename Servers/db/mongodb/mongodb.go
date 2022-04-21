@@ -19,7 +19,6 @@ func Connect() {
 		fmt.Println(err)
 		return
 	}
-	//defer c.Close()
 	c.EnsureUniqueIndex("userDB", "regist", []string{"name"})
 	log.Release("MongoDb 连接成功")
 	dialContext = c

@@ -13,10 +13,12 @@ func main() {
 
 	logindata := []byte(`{
 	"UserLogin":{
-		"LoginName": "admin",
-		"LoginPW": "admin123"
+		"LoginName": "admin-2",
+		"LoginPW": "admin123-2"
 		}
 	}`)
+
+	// 前两位为标识位: 第一个字节使用 1/0 表示所在字节后面还有/没有字节，第二个字节使用 1/0 表示所在字节后面有/没有字节
 	buf := make([]byte, 2+len(logindata))
 	binary.BigEndian.PutUint16(buf, uint16(len(logindata)))
 	copy(buf[2:], logindata)
