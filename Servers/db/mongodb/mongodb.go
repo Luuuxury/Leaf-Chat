@@ -20,22 +20,21 @@ func Connect() {
 		return
 	}
 	//defer c.Close()
-	c.EnsureUniqueIndex("game", "login", []string{"name"})
-	log.Release("mongodb Connect success")
+	c.EnsureUniqueIndex("userDB", "regist", []string{"name"})
+	log.Release("MongoDb 连接成功")
 	dialContext = c
 
 	InitData()
 }
 
 func InitData() {
-	err := Find("game", "login", bson.M{"name": "InitName"})
+	err := Find("userDB", "regist", bson.M{"name": "InitName"})
 	if err == nil {
-		log.Debug("数据库已经初始化过了", err)
+		log.Debug("用户数据库已经初始化过了")
 	} else {
-		err = Insert("game", "login", bson.M{"name": "InitName", "password": "qq123456"})
+		err = Insert("userDB", "regist", bson.M{"name": "InitName", "password": "InitPW"})
 		if err != nil {
-			fmt.Println(err)
-			log.Debug("数据初始化插入失败", err)
+			log.Debug("用户数据初始化失败: ", err)
 		}
 	}
 }
@@ -52,7 +51,6 @@ func Find(db string, collection string, docs interface{}) error {
 	user := new(person)
 	err := s.DB(db).C(collection).Find(docs).One(&user)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return err
@@ -64,7 +62,6 @@ func Insert(db string, collection string, docs interface{}) error {
 	defer c.UnRef(s)
 	err := s.DB(db).C(collection).Insert(docs)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return err
@@ -82,6 +79,6 @@ func FetchUserData(name string) (*UserData, error) {
 	defer c.UnRef(s)
 
 	resultData := &UserData{}
-	err := s.DB("game").C("login").Find(bson.M{"name": name}).One(resultData)
+	err := s.DB("userDB").C("regist").Find(bson.M{"name": name}).One(resultData)
 	return resultData, err
 }

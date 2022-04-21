@@ -3,7 +3,6 @@ package gamedata
 import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/recordfile"
-	"reflect"
 )
 
 func readRf(st interface{}) *recordfile.RecordFile {
@@ -11,10 +10,9 @@ func readRf(st interface{}) *recordfile.RecordFile {
 	if err != nil {
 		log.Fatal("%v", err)
 	}
-	fn := reflect.TypeOf(st).Name() + ".txt"
-	err = rf.Read("gamedata/" + fn)
+	err = rf.Read("/Users/liuyang/Desktop/Git/Go_Dev/Leaf-Chat/Servers/gamedata/robots.txt")
 	if err != nil {
-		log.Fatal("%v: %v", fn, err)
+		log.Fatal("%v: %v", err)
 	}
 
 	return rf

@@ -6,18 +6,9 @@ import (
 
 var Processor = json.NewProcessor()
 
-type ToGameModuleMsg struct {
-	MsgInfo string
-}
-
-type UserRegister struct {
-	RegisterName string
-	RegisterPW   string
-}
-
-type UserRegisterResult struct {
-	Err       string
-	Retresult string
+type UserRegist struct {
+	RegistName string
+	RegistPW   string
 }
 
 type UserLogin struct {
@@ -25,15 +16,26 @@ type UserLogin struct {
 	LoginPW   string
 }
 
-type UserLoginResult struct {
-	Err       string
-	Retresult string
+// ========== BroadCast Chat ============
+
+type C2S_AddUser struct {
+	UserName string
+}
+type C2S_Message struct {
+	Message string
+}
+
+type S2C_Message struct {
+	UserName string
+	Message  string
 }
 
 func init() {
-	Processor.Register(&ToGameModuleMsg{})
-	Processor.Register(&UserRegister{})
-	Processor.Register(&UserRegisterResult{})
+	Processor.Register(&UserRegist{})
 	Processor.Register(&UserLogin{})
-	Processor.Register(&UserLoginResult{})
+
+	Processor.Register(&C2S_Message{})
+	Processor.Register(&S2C_Message{})
+	Processor.Register(&C2S_AddUser{})
+
 }

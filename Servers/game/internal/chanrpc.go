@@ -1,6 +1,8 @@
 package internal
 
-import "github.com/name5566/leaf/gate"
+import (
+	"github.com/name5566/leaf/gate"
+)
 
 func init() {
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)

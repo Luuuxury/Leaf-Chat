@@ -9,83 +9,114 @@ import (
 	"leaf-chat/Servers/db/mongodb"
 	"leaf-chat/Servers/msg"
 	"reflect"
+	"time"
 )
+
+const maxMessages = 50
+
+var (
+	messages [maxMessages]struct {
+		userName string
+		message  string
+	}
+	messageIndex int
+)
+
+var loc = time.FixedZone("", 8*3600)
 
 func handler(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
 
 func init() {
-	//handler(&msg.UserRegister{}, handleLogin)
-	handler(&msg.UserRegister{}, handleRegister)
-	handler(&msg.UserLogin{}, handleUserLogin)
+	handler(&msg.UserRegist{}, handleRegist)
+	handler(&msg.UserLogin{}, handleLogin)
+
+	handler(&msg.C2S_Message{}, handleC2SMessage)
 }
 
-func handleRegister(args []interface{}) {
-	receMsg := args[0].(*msg.UserRegister)
-	agent := args[1].(gate.Agent)
-
-	returnMsg := &msg.UserRegisterResult{}
-	log.Debug("receive RegisterName is %v", receMsg.RegisterName)
-	log.Debug("receive RegisterPW is %v", receMsg.RegisterPW)
+func handleRegist(args []interface{}) {
+	recv := args[0].(*msg.UserRegist)
+	//agent := args[1].(gate.Agent)
+	log.Debug("注册用户名是: %v", recv.RegistName)
+	log.Debug("注册密码是: %v", recv.RegistPW)
 
 	//判断用户是否已经注册
-	err := mongodb.Find("game", "login", bson.M{"name": receMsg.RegisterName})
+	err := mongodb.Find("userDB", "regist", bson.M{"name": recv.RegistName})
 	if err == nil {
-		fmt.Println("执行 mongodb.Find 完成， err为None, err is", err)
-		log.Debug("Debug is 该用户名已经注册, 请换个用户名")
-		returnMsg.Err = "用户名已经注册了, 请重新注册～"
-		returnMsg.Retresult = "Retresult is ok"
-		// 给客户端返回，说明已经该用户已经注册过了
-		agent.WriteMsg(returnMsg)
+		log.Debug("该用户名已经被注册, 请换个用户名!")
+		return
 	}
 	// 如果该用户名没有被注册过，就直接 insert
-	err = mongodb.Insert("game", "login", bson.M{"name": receMsg.RegisterName, "password": receMsg.RegisterPW})
+	err = mongodb.Insert("userDB", "regist", bson.M{"name": recv.RegistName, "password": recv.RegistPW})
 	if err != nil {
-		fmt.Println("执行插入用户操作失败, 报错提示 is", err)
-		log.Debug("Debug 用户名写入失败!")
-		returnMsg.Err = "returnMsg.Err is :用户名插入失败！"
-		returnMsg.Retresult = "Retresult is ok"
-		agent.WriteMsg(returnMsg)
+		log.Debug("数据库添加用户名失败!")
 	} else {
-		fmt.Println("执行插入用户操作 sucess")
-		log.Debug("Debug UserRegister write in success")
-		returnMsg.Err = "returnMsg.Err is :用户名插入成功！"
-		returnMsg.Retresult = "Retresult is ok"
-		agent.WriteMsg(returnMsg)
+		log.Debug("数据库添加用户成功!")
 	}
 }
 
-func handleUserLogin(args []interface{}) {
+func handleLogin(args []interface{}) {
 	receMsg := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
-	returnMsg := &msg.UserLoginResult{}
-	log.Debug("receive UserLogin name=%v", receMsg.LoginName)
-	log.Debug("receive UserLogin pw=%v", receMsg.LoginPW)
-
-	sendErrFunc := func(err string) {
-		returnMsg.Err = err
-		agent.WriteMsg(returnMsg)
-	}
-
+	log.Debug("登陆用户名是: %v", receMsg.LoginName)
+	log.Debug("登陆密码是: %v", receMsg.LoginPW)
 	if receMsg.LoginName == "" {
-		sendErrFunc("account name is null")
+		log.Debug("登陆用户名为空!")
 		return
 	}
 
-	// 获取该人员的数据库信息
+	// 从数据库核对用户名和密码
 	userData, err := mongodb.FetchUserData(receMsg.LoginName)
-	fmt.Println("Fetch User Data is", userData)
-	fmt.Println("Fetch User pw is ", userData.Password)
 	// 如果数据库没有这个人，就把把这个人添加进去
 	if err == mgo.ErrNotFound {
-		fmt.Println("数据库没有这个人，请重新输入正确的用户名")
+		log.Debug("登陆用户名不存在，请输入正确的用户名")
 	}
 	if err != nil {
-		fmt.Println("获取人员信息出错了! err is", err)
+		log.Debug("登陆获取用户信息出错 err: %v", err)
 		return
 		// 如果有这个人，但是密码错误
 	} else if userData.Password != receMsg.LoginPW {
-		fmt.Println("登陆密码不对！")
+		log.Debug("登陆密码不对！")
 	}
+
+	// 将该用户加入群聊
+	agent.SetUserData(receMsg.LoginName)
+	for i := 0; i < maxMessages; i++ {
+		index := (messageIndex + i) % maxMessages
+		pm := &messages[index]
+		if pm.message == "" {
+			continue
+		}
+		agent.WriteMsg(&msg.S2C_Message{
+			UserName: pm.userName,
+			Message:  pm.message,
+		})
+	}
+}
+
+func handleC2SMessage(args []interface{}) {
+	recv := args[0].(*msg.C2S_Message)
+	agent := args[1].(gate.Agent)
+	userName, ok := agent.UserData().(string)
+	if !ok {
+		return
+	}
+
+	now := time.Now().In(loc)
+	message := fmt.Sprintf("@%02d:%02d %s", now.Hour(), now.Minute(), recv.Message)
+	pm := &messages[messageIndex]
+	pm.userName = userName
+	pm.message = message
+	messageIndex++
+
+	if messageIndex >= maxMessages {
+		messageIndex = 0
+	}
+
+	broadcastMsg(&msg.S2C_Message{
+		UserName: userName,
+		Message:  message,
+	}, agent)
+
 }
