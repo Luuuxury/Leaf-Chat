@@ -16,6 +16,10 @@ type UserLogin struct {
 	LoginPW   string
 }
 
+type RegistResult struct {
+	Message string
+}
+
 // ========== BroadCast Chat ============
 
 type C2S_Message struct {
@@ -30,6 +34,7 @@ type S2C_Message struct {
 func init() {
 	Processor.Register(&UserRegist{})
 	Processor.Register(&UserLogin{})
+	Processor.Register(&RegistResult{})
 
 	Processor.Register(&C2S_Message{})
 	Processor.Register(&S2C_Message{})

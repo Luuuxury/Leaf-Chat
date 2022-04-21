@@ -37,8 +37,10 @@ func init() {
 }
 
 func handleRegist(args []interface{}) {
+	// 收到的消息
 	recv := args[0].(*msg.UserRegist)
-	//agent := args[1].(gate.Agent)
+	// 消息的发送者
+	agent := args[1].(gate.Agent)
 	log.Debug("注册用户名是: %v", recv.RegistName)
 	log.Debug("注册密码是: %v", recv.RegistPW)
 
@@ -49,17 +51,23 @@ func handleRegist(args []interface{}) {
 		return
 	}
 	// 如果该用户名没有被注册过，就直接 insert
-	hashpw, err := bcrypt.GenerateFromPassword([]byte(recv.RegistPW), bcrypt.DefaultCost)
+	hashPw, err := bcrypt.GenerateFromPassword([]byte(recv.RegistPW), bcrypt.DefaultCost)
 	if err != nil {
 		log.Debug("密码加密过程出错")
 	}
-	strpw := string(hashpw)
-	err = mongodb.Insert("userDB", "regist", bson.M{"name": recv.RegistName, "password": strpw})
+	strPw := string(hashPw)
+	err = mongodb.Insert("userDB", "regist", bson.M{"name": recv.RegistName, "password": strPw})
 	if err != nil {
 		log.Debug("数据库添加用户名失败!")
 	} else {
 		log.Debug("数据库添加用户成功!")
 	}
+
+	retBuf := &msg.RegistResult{
+		Message: "服务端业务处理完成结果",
+	}
+
+	agent.WriteMsg(retBuf)
 }
 
 func handleLogin(args []interface{}) {
