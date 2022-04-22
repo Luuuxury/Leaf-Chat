@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 )
 
 func init() {
@@ -9,26 +10,23 @@ func init() {
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
 }
 
-var users = make(map[gate.Agent]struct{})
+var onlineMap = make(map[gate.Agent]struct{})
 
 func rpcNewAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
-	users[a] = struct{}{}
+	onlineMap[a] = struct{}{}
 }
 
 func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
-	delete(users, a)
+	delete(onlineMap, a)
 
-	_, ok := a.UserData().(string)
-	if !ok {
-		return
-	}
 }
 
 func broadcastMsg(msg interface{}, _a gate.Agent) {
-	for a := range users {
+	for a := range onlineMap {
 		if a == _a {
+			log.Debug("群发不用再给自己发了")
 			continue
 		}
 		a.WriteMsg(msg)

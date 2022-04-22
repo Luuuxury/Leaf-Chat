@@ -41,7 +41,7 @@ func init() {
 	Processor.Register(&RegistResult{})
 	Processor.Register(&LoginResult{})
 
+	// WorldMessage
 	Processor.Register(&C2S_Message{})
 	Processor.Register(&S2C_Message{})
-
 }

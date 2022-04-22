@@ -15,8 +15,8 @@ func main() {
 
 	logindata := []byte(`{
 	"UserLogin":{
-		"LoginName": "admin-1",
-		"LoginPW": "admin123-1"
+		"LoginName": "admin-2",
+		"LoginPW": "admin123-2"
 		}
 	}`)
 
@@ -29,11 +29,15 @@ func main() {
 		fmt.Println("客户端写入数据出错了")
 	}
 
+	// ==================== 接收Server消息 ====================
+	// 1. 用户接收用户登陆流程信息
+	// 2. 登陆后开始接收世界消息
+
 	for {
 		readBuf := make([]byte, 4096)
 		n, err := conn.Read(readBuf)
 		if err != nil {
-			fmt.Println("读取服务端业务处理结果失败!")
+			fmt.Println("服务器下线了")
 			break
 		}
 		registResult := string(readBuf[:n])
