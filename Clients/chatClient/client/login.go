@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/log"
 	"net"
-	"time"
 )
 
 func main() {
@@ -16,8 +15,8 @@ func main() {
 
 	logindata := []byte(`{
 	"UserLogin":{
-		"LoginName": "",
-		"LoginPW": "admin123-2"
+		"LoginName": "admin-1",
+		"LoginPW": "admin123-1"
 		}
 	}`)
 
@@ -30,14 +29,15 @@ func main() {
 		fmt.Println("客户端写入数据出错了")
 	}
 
-	time.Sleep(time.Second * 2)
-	readBuf := make([]byte, 4096)
-	n, err := conn.Read(readBuf)
-	if err != nil {
-		fmt.Println("读取服务端业务处理结果失败!")
+	for {
+		readBuf := make([]byte, 4096)
+		n, err := conn.Read(readBuf)
+		if err != nil {
+			fmt.Println("读取服务端业务处理结果失败!")
+			break
+		}
+		registResult := string(readBuf[:n])
+		fmt.Println(registResult)
 	}
-	registResult := string(readBuf[:n])
-	fmt.Println(registResult)
 
-	select {}
 }

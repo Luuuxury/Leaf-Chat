@@ -39,6 +39,7 @@ func init() {
 	Processor.Register(&UserRegist{})
 	Processor.Register(&UserLogin{})
 	Processor.Register(&RegistResult{})
+	Processor.Register(&LoginResult{})
 
 	Processor.Register(&C2S_Message{})
 	Processor.Register(&S2C_Message{})

@@ -49,6 +49,7 @@ func handleRegist(args []interface{}) {
 			Message: "该用户名已经被注册",
 		}
 		agent.WriteMsg(retResult)
+		return
 	}
 	// 如果该用户名没有被注册过，就直接 insert
 
@@ -64,12 +65,14 @@ func handleRegist(args []interface{}) {
 			Message: "注册失败，请重新注册",
 		}
 		agent.WriteMsg(retResult)
+		return
 	} else {
 		//log.Debug("数据库添加用户成功!")
 		retResult := &msg.RegistResult{
 			Message: "注册成功",
 		}
 		agent.WriteMsg(retResult)
+		return
 	}
 }
 
@@ -79,7 +82,7 @@ func handleLogin(args []interface{}) {
 
 	if recv.LoginName == "" {
 		//log.Debug("数据库添加用户成功!")
-		retResult := &msg.RegistResult{
+		retResult := &msg.LoginResult{
 			Message: "请输入正确的用户名",
 		}
 		agent.WriteMsg(retResult)
@@ -90,25 +93,26 @@ func handleLogin(args []interface{}) {
 	userData, err := mongodb.FetchUserData(recv.LoginName)
 	if err == mgo.ErrNotFound {
 		//log.Debug("登陆用户名不存在")
-		retResult := &msg.RegistResult{
+		retResult := &msg.LoginResult{
 			Message: "登陆用户名不存在",
 		}
 		agent.WriteMsg(retResult)
+		return
 	}
 	// 密码核对
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(recv.LoginPW))
 	if err != nil {
 		//log.Debug("输入的用户名或密码不正确!")
-		retResult := &msg.RegistResult{
+		retResult := &msg.LoginResult{
 			Message: "输入的用户名或密码不正确",
 		}
 		agent.WriteMsg(retResult)
+		return
 	} else {
-		retResult := &msg.RegistResult{
+		retResult := &msg.LoginResult{
 			Message: "登陆成功",
 		}
 		agent.WriteMsg(retResult)
-
 	}
 	// 将该用户添加到世界聊天
 	agent.SetUserData(recv.LoginName)
