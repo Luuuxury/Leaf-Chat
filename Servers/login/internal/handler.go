@@ -41,16 +41,17 @@ func handleRegist(args []interface{}) {
 	recv := args[0].(*msg.UserRegist)
 	// 消息的发送者
 	agent := args[1].(gate.Agent)
-	log.Debug("注册用户名是: %v", recv.RegistName)
-	log.Debug("注册密码是: %v", recv.RegistPW)
 
 	//判断用户是否已经注册
 	err := mongodb.Find("userDB", "regist", bson.M{"name": recv.RegistName})
 	if err == nil {
-		log.Debug("该用户名已经被注册, 请换个用户名!")
-		return
+		retResult := &msg.RegistResult{
+			Message: "该用户名已经被注册",
+		}
+		agent.WriteMsg(retResult)
 	}
 	// 如果该用户名没有被注册过，就直接 insert
+
 	hashPw, err := bcrypt.GenerateFromPassword([]byte(recv.RegistPW), bcrypt.DefaultCost)
 	if err != nil {
 		log.Debug("密码加密过程出错")
@@ -58,42 +59,57 @@ func handleRegist(args []interface{}) {
 	strPw := string(hashPw)
 	err = mongodb.Insert("userDB", "regist", bson.M{"name": recv.RegistName, "password": strPw})
 	if err != nil {
-		log.Debug("数据库添加用户名失败!")
+		//log.Debug("数据库添加用户名失败!")
+		retResult := &msg.RegistResult{
+			Message: "注册失败，请重新注册",
+		}
+		agent.WriteMsg(retResult)
 	} else {
-		log.Debug("数据库添加用户成功!")
+		//log.Debug("数据库添加用户成功!")
+		retResult := &msg.RegistResult{
+			Message: "注册成功",
+		}
+		agent.WriteMsg(retResult)
 	}
-
-	retBuf := &msg.RegistResult{
-		Message: "服务端业务处理完成结果",
-	}
-
-	agent.WriteMsg(retBuf)
 }
 
 func handleLogin(args []interface{}) {
 	recv := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
-	log.Debug("登陆用户名是: %v", recv.LoginName)
-	log.Debug("登陆密码是: %v", recv.LoginPW)
+
 	if recv.LoginName == "" {
-		log.Debug("登陆用户名为空!")
+		//log.Debug("数据库添加用户成功!")
+		retResult := &msg.RegistResult{
+			Message: "请输入正确的用户名",
+		}
+		agent.WriteMsg(retResult)
 		return
 	}
 
 	// 数据库获取该用户信息
 	userData, err := mongodb.FetchUserData(recv.LoginName)
 	if err == mgo.ErrNotFound {
-		log.Debug("登陆用户名不存在，请输入正确的用户名!")
-		return
+		//log.Debug("登陆用户名不存在")
+		retResult := &msg.RegistResult{
+			Message: "登陆用户名不存在",
+		}
+		agent.WriteMsg(retResult)
 	}
 	// 密码核对
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(recv.LoginPW))
 	if err != nil {
-		log.Debug("输入的用户名或密码不正确!")
+		//log.Debug("输入的用户名或密码不正确!")
+		retResult := &msg.RegistResult{
+			Message: "输入的用户名或密码不正确",
+		}
+		agent.WriteMsg(retResult)
 	} else {
-		log.Debug("登陆成功!")
-	}
+		retResult := &msg.RegistResult{
+			Message: "登陆成功",
+		}
+		agent.WriteMsg(retResult)
 
+	}
 	// 将该用户添加到世界聊天
 	agent.SetUserData(recv.LoginName)
 	for i := 0; i < maxMessages; i++ {

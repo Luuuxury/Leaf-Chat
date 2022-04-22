@@ -3,24 +3,21 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"leaf-chat/Servers/msg"
+	"github.com/name5566/leaf/log"
 	"net"
+	"time"
 )
-
-func init() {
-	msg.Processor.SetHandler(&msg.RegistResult{}, handleCheckRegist)
-}
 
 func main() {
 	conn, err := net.Dial("tcp", "127.0.0.1:21002")
 	if err != nil {
-		panic(err)
+		log.Debug("客户端连接失败: ", err)
 	}
 
 	registdata := []byte(`{
 		"UserRegist": {
-			"RegistName": "admin-9",
-			"RegistPW": "admin123-9"
+			"RegistName": "admin-1",
+			"RegistPW": "admin123-1"
 		}
 	}`)
 
@@ -33,10 +30,14 @@ func main() {
 		fmt.Println("客户端写入数据出错了")
 	}
 
-}
+	time.Sleep(time.Second * 2)
+	readBuf := make([]byte, 4096)
+	n, err := conn.Read(readBuf)
+	if err != nil {
+		fmt.Println("读取服务端业务处理结果失败!")
+	}
+	registResult := string(readBuf[:n])
+	fmt.Println(registResult)
 
-func handleCheckRegist(args []interface{}) {
-
-	recv := args[0].(*msg.RegistResult)
-	fmt.Println("From Server Msg: ", recv.Message)
+	select {}
 }

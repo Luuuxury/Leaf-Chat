@@ -20,6 +20,10 @@ type RegistResult struct {
 	Message string
 }
 
+type LoginResult struct {
+	Message string
+}
+
 // ========== BroadCast Chat ============
 
 type C2S_Message struct {
