@@ -6,6 +6,8 @@ import (
 
 var Processor = json.NewProcessor()
 
+//var Processor = protobuf.NewProcessor()
+
 type UserRegist struct {
 	RegistName string
 	RegistPW   string
@@ -26,22 +28,10 @@ type LoginResult struct {
 
 // ========== BroadCast Chat ============
 
-type C2S_Message struct {
-	Message string
-}
-
-type S2C_Message struct {
-	UserName string
-	Message  string
-}
-
 func init() {
 	Processor.Register(&UserRegist{})
 	Processor.Register(&UserLogin{})
 	Processor.Register(&RegistResult{})
 	Processor.Register(&LoginResult{})
 
-	// WorldMessage
-	Processor.Register(&C2S_Message{})
-	Processor.Register(&S2C_Message{})
 }

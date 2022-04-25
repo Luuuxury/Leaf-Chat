@@ -67,10 +67,8 @@ func handleLogin(args []interface{}) {
 	//agent.SetUserData(recv.LoginName)
 
 	// 用户上线广播
-
-	broadcastMsg(&msg.S2C_Message{
-		UserName: recv.LoginName,
-		Message:  "上线了",
+	broadcastMsg(&msg.LoginResult{
+		Message: "新用户上线了",
 	}, agent)
 
 	if recv.LoginName == "" {

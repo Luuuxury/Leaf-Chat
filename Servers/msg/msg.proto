@@ -1,0 +1,27 @@
+syntax="proto3";                //Proto协议
+package msg;                     //当前包名
+
+// option go_package = "path;name";
+option go_package="./;msg";
+
+
+message UserRegist {
+  string RegistName =1;
+  string RegistPW  =2;
+}
+
+message UserLogin {
+  string LoginName =1;
+  string LoginPW =2;
+}
+
+
+message RegistResult {
+  string Message  =1;
+}
+
+message  LoginResult {
+  string Message =1;
+}
+
+
