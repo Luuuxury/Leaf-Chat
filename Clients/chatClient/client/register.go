@@ -15,25 +15,19 @@ func main() {
 		log.Debug("客户端连接失败: ", err)
 	}
 
-	clientdata := &msg.UserRegist{
-		RegistName: *proto.String("admin-1"),
-		RegistPW:   *proto.String("admin-1"),
+	registdata := &msg.UserRegist{
+		RegistName: "admin-1",
+		RegistPW:   "admin-1",
 	}
-	marshaldata, err := proto.Marshal(clientdata)
-	fmt.Println("marshaldata is: ", marshaldata)
+	marshaldata, err := proto.Marshal(registdata)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	//  -------------------------------
-	//  | len | id | protobuf message |
-	//  -------------------------------
-	writeBuf := make([]byte, 2+2+len(marshaldata))                     // 2: 记录数据长度 ， 2：id-2字节
-	binary.BigEndian.PutUint16(writeBuf[0:2], uint16(2+len(writeBuf))) // len
-	binary.BigEndian.PutUint16(writeBuf[2:4], uint16(0))               //id
+	writeBuf := make([]byte, 2+2+len(marshaldata))
+	binary.BigEndian.PutUint16(writeBuf[0:2], uint16(2+len(marshaldata)))
+	binary.BigEndian.PutUint16(writeBuf[2:4], uint16(0))
 	copy(writeBuf[4:], marshaldata)
-	fmt.Println("writeBuf is: ", writeBuf)
-	
 	conn.Write(writeBuf)
 
 	// 读数据

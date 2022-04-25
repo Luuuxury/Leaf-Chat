@@ -26,7 +26,6 @@ func handleRegist(args []interface{}) {
 	recv := args[0].(*msg.UserRegist)
 	// 消息的发送者
 	agent := args[1].(gate.Agent)
-	log.Debug("recv is: ", recv.RegistName)
 	//判断用户是否已经注册
 	err := mongodb.Find("userDB", "regist", bson.M{"name": recv.RegistName})
 	if err == nil {

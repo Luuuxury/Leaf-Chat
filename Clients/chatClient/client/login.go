@@ -14,37 +14,38 @@ func main() {
 	if err != nil {
 		log.Debug("客户端连接失败: ", err)
 	}
-
-	clientdata := &msg.UserLogin{
+	logindata := &msg.UserLogin{
 		LoginName: "admin-1",
 		LoginPW:   "admin-1",
 	}
-	protoMarshal, err := proto.Marshal(clientdata)
+	marshaldata, err := proto.Marshal(logindata)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	//  -------------------------------
-	//  | len | id | protobuf message |
-	//  -------------------------------
-	writeBuf := make([]byte, 2+2+len(protoMarshal)) // 2: 记录数据长度 ， 2：id-2字节
 
-	// 默认使用大端序
-	binary.BigEndian.PutUint16(writeBuf, uint16(2+len(writeBuf))) // [0:2] 俩字节记录 整个protobuf长度， 长度包括 len(id) + len(data)
-	binary.BigEndian.PutUint16(writeBuf[2:], uint16(0))           // [2:4] 俩字节记录 id 编号是多少
-	copy(writeBuf[4:], protoMarshal)
+	writeBuf := make([]byte, 2+2+len(marshaldata))
+	binary.BigEndian.PutUint16(writeBuf, uint16(2+len(marshaldata)))
+	binary.BigEndian.PutUint16(writeBuf[2:], uint16(1))
+	copy(writeBuf[4:], marshaldata)
 	// 发送消息
 	conn.Write(writeBuf)
 
+	// 接收服务端消息
 	for {
-		readBuf := make([]byte, 4096)
+		// 接收消息
+		readBuf := make([]byte, 1024)
 		n, err := conn.Read(readBuf)
 		if err != nil {
-			fmt.Println("与服务器断开连接")
+			fmt.Println("读取服务端业务处理结果失败!")
 			break
 		}
-		registResult := string(readBuf[:n])
-		fmt.Println(registResult)
+		recv := &msg.LoginResult{}
+		err = proto.Unmarshal(readBuf[4:n], recv)
+		if err != nil {
+			log.Debug("unmarshaling error: ", err)
+		}
+		fmt.Println(recv.Message)
 	}
 
 }
