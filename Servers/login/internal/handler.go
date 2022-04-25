@@ -26,7 +26,7 @@ func handleRegist(args []interface{}) {
 	recv := args[0].(*msg.UserRegist)
 	// 消息的发送者
 	agent := args[1].(gate.Agent)
-
+	log.Debug("recv is: ", recv.RegistName)
 	//判断用户是否已经注册
 	err := mongodb.Find("userDB", "regist", bson.M{"name": recv.RegistName})
 	if err == nil {
@@ -37,7 +37,6 @@ func handleRegist(args []interface{}) {
 		return
 	}
 	// 如果该用户名没有被注册过，就直接 insert
-
 	hashPw, err := bcrypt.GenerateFromPassword([]byte(recv.RegistPW), bcrypt.DefaultCost)
 	if err != nil {
 		log.Debug("密码加密过程出错")
@@ -64,13 +63,7 @@ func handleRegist(args []interface{}) {
 func handleLogin(args []interface{}) {
 	recv := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
-	//agent.SetUserData(recv.LoginName)
-
-	// 用户上线广播
-	broadcastMsg(&msg.LoginResult{
-		Message: "新用户上线了",
-	}, agent)
-
+	log.Debug("handleLogin recv is: ", recv.LoginName)
 	if recv.LoginName == "" {
 		//log.Debug("数据库添加用户成功!")
 		retResult := &msg.LoginResult{
@@ -90,6 +83,7 @@ func handleLogin(args []interface{}) {
 		agent.WriteMsg(retResult)
 		return
 	}
+
 	// 密码核对
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(recv.LoginPW))
 	if err != nil {

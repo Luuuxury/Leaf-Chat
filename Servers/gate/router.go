@@ -8,8 +8,8 @@ import (
 func init() {
 	// 登录消息(Login)由login模块处理，此处类似于django的urls.py
 	// 模块间使用 ChanRPC 通讯，消息路由也不例外
-	msg.Processor.SetRouter(&msg.UserLogin{}, login.ChanRPC)
-	msg.Processor.SetRouter(&msg.UserRegist{}, login.ChanRPC)
+	msg.Processor.SetRouter(&msg.UserRegist{}, login.ChanRPC) // 0
+	msg.Processor.SetRouter(&msg.UserLogin{}, login.ChanRPC)  // 1
 
 }
 
