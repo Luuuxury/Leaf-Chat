@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"golang.org/x/crypto/bcrypt"
@@ -59,10 +60,13 @@ func handleRegist(args []interface{}) {
 	}
 }
 
+var onlineMap = make(map[gate.Agent]struct{})
+
 func handleLogin(args []interface{}) {
 	recv := args[0].(*msg.UserLogin)
 	agent := args[1].(gate.Agent)
-	log.Debug("handleLogin recv is: ", recv.LoginName)
+	onlineMap[agent] = struct{}{}
+	agent.SetUserData(recv.LoginName)
 	if recv.LoginName == "" {
 		//log.Debug("数据库添加用户成功!")
 		retResult := &msg.LoginResult{
@@ -71,7 +75,6 @@ func handleLogin(args []interface{}) {
 		agent.WriteMsg(retResult)
 		return
 	}
-
 	// 数据库获取该用户信息
 	userData, err := mongodb.FetchUserData(recv.LoginName)
 	if err == mgo.ErrNotFound {
@@ -97,6 +100,17 @@ func handleLogin(args []interface{}) {
 			Message: "登陆成功",
 		}
 		agent.WriteMsg(retResult)
+		// 广播用户上线
+		fmt.Println(onlineMap)
+		for a := range onlineMap {
+			brodcastMsg := &msg.LoginResult{
+				Message: "用户上线了",
+			}
+			go func(a gate.Agent) {
+				a.WriteMsg(brodcastMsg)
+				fmt.Println(a.UserData())
+			}(a)
+		}
 	}
 
 }

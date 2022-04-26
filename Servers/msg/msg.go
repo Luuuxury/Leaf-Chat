@@ -11,4 +11,5 @@ func init() {
 	Processor.Register(&UserLogin{})
 	Processor.Register(&RegistResult{})
 	Processor.Register(&LoginResult{})
+	Processor.Register(&S2C_Message{})
 }

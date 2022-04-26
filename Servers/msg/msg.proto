@@ -23,4 +23,7 @@ message  LoginResult {
   string Message = 1;
 }
 
+message  S2C_Message {
+  string Message = 2;
+}
 
