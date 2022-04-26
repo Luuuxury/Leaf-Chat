@@ -10,6 +10,7 @@ import (
 	"leaf-chat/Servers/db/mongodb"
 	"leaf-chat/Servers/msg"
 	"reflect"
+	"time"
 )
 
 func handler(m interface{}, h interface{}) {
@@ -102,15 +103,21 @@ func handleLogin(args []interface{}) {
 		agent.WriteMsg(retResult)
 		// 广播用户上线
 		fmt.Println(onlineMap)
-		for a := range onlineMap {
-			brodcastMsg := &msg.LoginResult{
-				Message: "用户上线了",
-			}
-			go func(a gate.Agent) {
-				a.WriteMsg(brodcastMsg)
-				fmt.Println(a.UserData())
-			}(a)
+		time.Sleep(time.Second * 1)
+		broacastMsg := &msg.S2C_Message{
+			UserName: recv.LoginName,
+			Message:  "用户上线",
 		}
+		broadcast(broacastMsg, agent)
 	}
+}
 
+func broadcast(msg interface{}, _a gate.Agent) {
+	for a := range onlineMap {
+		if a == _a {
+			continue
+		}
+		a.WriteMsg(msg)
+		fmt.Println(a.UserData())
+	}
 }
