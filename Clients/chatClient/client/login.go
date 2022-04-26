@@ -7,6 +7,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"leaf-chat/Servers/msg"
 	"net"
+	"time"
 )
 
 func main() {
@@ -15,8 +16,8 @@ func main() {
 		log.Debug("客户端连接失败: ", err)
 	}
 	logindata := &msg.UserLogin{
-		LoginName: "admin-2",
-		LoginPW:   "admin-2",
+		LoginName: "admin-3",
+		LoginPW:   "admin-3",
 	}
 	marshaldata, err := proto.Marshal(logindata)
 	if err != nil {
@@ -31,7 +32,21 @@ func main() {
 	// 发送消息
 	conn.Write(writeBuf)
 
-	// 接收服务端消息
+	// 接收登陆消息
+	time.Sleep(time.Second * 1)
+	readBuf := make([]byte, 1024)
+	n, err := conn.Read(readBuf)
+	if err != nil {
+		fmt.Println("与服务器断开连接")
+	}
+	recv := &msg.LoginResult{}
+	err = proto.Unmarshal(readBuf[4:n], recv)
+	if err != nil {
+		log.Debug("Client接收消息反序列化出错: ", err)
+	}
+	fmt.Println(recv.Message)
+
+	// 接收大厅广播消息消息
 	for {
 		// 接收消息
 		readBuf := make([]byte, 1024)
@@ -47,5 +62,4 @@ func main() {
 		}
 		fmt.Println(recv.UserName, recv.Message)
 	}
-
 }
