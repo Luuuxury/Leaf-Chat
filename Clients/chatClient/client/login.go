@@ -15,8 +15,8 @@ func main() {
 		log.Debug("客户端连接失败: ", err)
 	}
 	logindata := &msg.UserLogin{
-		LoginName: "admin-1",
-		LoginPW:   "admin-1",
+		LoginName: "admin-3",
+		LoginPW:   "admin-3",
 	}
 	marshaldata, err := proto.Marshal(logindata)
 	if err != nil {
@@ -32,20 +32,22 @@ func main() {
 	conn.Write(writeBuf)
 
 	// 接收服务端消息
-	for {
-		// 接收消息
-		readBuf := make([]byte, 1024)
-		n, err := conn.Read(readBuf)
-		if err != nil {
-			fmt.Println("读取服务端业务处理结果失败!")
-			break
+	go func() {
+		for {
+			// 接收消息
+			readBuf := make([]byte, 1024)
+			n, err := conn.Read(readBuf)
+			if err != nil {
+				fmt.Println("与服务器断开连接")
+				break
+			}
+			recv := &msg.LoginResult{}
+			err = proto.Unmarshal(readBuf[4:n], recv)
+			if err != nil {
+				log.Debug("Client接收消息反序列化出错: ", err)
+			}
+			fmt.Println(recv.Message)
 		}
-		recv := &msg.LoginResult{}
-		err = proto.Unmarshal(readBuf[4:n], recv)
-		if err != nil {
-			log.Debug("unmarshaling error: ", err)
-		}
-		fmt.Println(recv.Message)
-	}
-
+	}()
+	select {}
 }
