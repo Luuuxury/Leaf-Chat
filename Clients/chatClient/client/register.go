@@ -16,8 +16,8 @@ func main() {
 	}
 
 	registdata := &msg.UserRegist{
-		RegistName: "admin-3",
-		RegistPW:   "admin-3",
+		RegistName: "admin-4",
+		RegistPW:   "admin-4",
 	}
 	marshaldata, err := proto.Marshal(registdata)
 	if err != nil {

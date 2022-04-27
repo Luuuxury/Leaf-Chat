@@ -19,14 +19,25 @@ func handler(m interface{}, h interface{}) {
 
 func init() {
 	handler(&msg.UserRegist{}, handleRegist)
+	handler(&msg.C2S_Message{}, handleBroadCast)
 	handler(&msg.UserLogin{}, handleLogin)
+}
 
+var loc = time.FixedZone("", 8*3600)
+
+var onlineMap = make(map[gate.Agent]struct{})
+
+func broadcast(msg interface{}, _a gate.Agent) {
+	for a := range onlineMap {
+		if a == _a {
+			continue
+		}
+		a.WriteMsg(msg)
+	}
 }
 
 func handleRegist(args []interface{}) {
-	// 收到的消息
 	recv := args[0].(*msg.UserRegist)
-	// 消息的发送者
 	agent := args[1].(gate.Agent)
 	//判断用户是否已经注册
 	err := mongodb.Find("userDB", "regist", bson.M{"name": recv.RegistName})
@@ -60,8 +71,6 @@ func handleRegist(args []interface{}) {
 		return
 	}
 }
-
-var onlineMap = make(map[gate.Agent]struct{})
 
 func handleLogin(args []interface{}) {
 	recv := args[0].(*msg.UserLogin)
@@ -102,7 +111,6 @@ func handleLogin(args []interface{}) {
 		}
 		agent.WriteMsg(retResult)
 		// 广播用户上线
-		fmt.Println(onlineMap)
 		time.Sleep(time.Second * 1)
 		broacastMsg := &msg.S2C_Message{
 			UserName: recv.LoginName,
@@ -112,12 +120,16 @@ func handleLogin(args []interface{}) {
 	}
 }
 
-func broadcast(msg interface{}, _a gate.Agent) {
-	for a := range onlineMap {
-		if a == _a {
-			continue
-		}
-		a.WriteMsg(msg)
-		fmt.Println(a.UserData())
+func handleBroadCast(args []interface{}) {
+	recv := args[0].(*msg.C2S_Message)
+	agent := args[1].(gate.Agent)
+	now := time.Now().In(loc)
+	message := fmt.Sprintf("@%02d:%02d %s", now.Hour(), now.Minute(), recv.Message)
+
+	broacastMsg := &msg.S2C_Message{
+		UserName: "消息中心",
+		Message:  message,
 	}
+	broadcast(broacastMsg, agent)
+
 }

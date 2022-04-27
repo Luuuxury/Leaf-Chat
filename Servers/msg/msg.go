@@ -7,8 +7,10 @@ import (
 var Processor = protobuf.NewProcessor()
 
 func init() {
-	Processor.Register(&UserRegist{})
-	Processor.Register(&UserLogin{})
+	Processor.Register(&UserRegist{})  // 0
+	Processor.Register(&UserLogin{})   // 1
+	Processor.Register(&C2S_Message{}) // 2
+
 	Processor.Register(&RegistResult{})
 	Processor.Register(&LoginResult{})
 	Processor.Register(&S2C_Message{})

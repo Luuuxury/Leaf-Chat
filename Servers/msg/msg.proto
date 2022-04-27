@@ -23,6 +23,10 @@ message  LoginResult {
   string Message = 1;
 }
 
+message  C2S_Message {
+  string Message = 1;
+}
+
 message  S2C_Message {
   string UserName = 1;
   string Message = 2;
